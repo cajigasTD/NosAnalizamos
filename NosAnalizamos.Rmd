@@ -1,0 +1,50 @@
+---
+title: "NosAnalizamos"
+author; "Mariana Cajigas"
+output: html_document
+date: "2026-05-04"
+---
+
+```{r }
+#2)
+library(pacman)
+
+pacman::p_load(
+  tidyverse,
+  mice,
+  knitr,
+  validate,
+  deducorrect,
+  VIM,
+  GGally
+)
+
+```
+
+```{r }
+#3
+datos <- read_tsv(
+  "data/NosAutoanalizamos2022 - Hoja1.tsv",
+  skip = 25,
+  trim_ws = TRUE,
+  show_col_types = FALSE
+)
+datos <- datos[-1, -1]
+datos <- datos[rowSums(!is.na(datos)) > 0, ]
+datos <- datos %>%
+  filter(!is.na(Id), Id !="")
+
+dim(datos)
+head(datos)
+tail(datos)
+str(datos)
+names(datos)
+```
+
+```{r }
+#4)
+datos <- datos %>%
+  filter(Id != "martsobm")
+```
+```
+
