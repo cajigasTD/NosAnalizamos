@@ -127,3 +127,44 @@ round(cov_pearson, 2)
 cov_spearman <- cov(notas_completas, method = "spearman")
 round(cov_spearman, 2)
 ```
+```{r }
+#9)
+notas_largas_sin_na <- notas_largas %>%
+  filter(!is.na(nota))
+
+ggplot(notas_largas_sin_na, aes(x = asignatura, y = nota)) +
+  geom_boxplot() +
+  labs(
+    title = "Calificaciones por asignatura",
+    x = "Asignatura",
+    y = "Calificación"
+  )
+```
+```{r }
+#10)
+datos$Sex[datos$Sex == "F"] <- "Femenino"
+datos$Sex[datos$Sex == "M"] <- "Masculino"
+
+table(datos$Sex)
+sum(is.na(datos$Sex))
+
+notas_largas_sexo <- datos %>%
+  select(Id, Sex, ALG, ANM, FP, DCS, MD) %>%
+  pivot_longer(
+    cols = c(ALG, ANM, FP, DCS, MD),
+    names_to = "asignatura",
+    values_to = "nota"
+  )
+
+notas_sexo <- notas_largas_sexo %>%
+  filter(!is.na(nota), !is.na(Sex))
+
+ggplot(notas_sexo, aes(x = asignatura, y = nota, fill = Sex)) +
+  geom_boxplot() +
+  labs(
+    title = "Calificaciones por asignatura y sexo",
+    x = "Asignatura",
+    y = "Calificación",
+    fill = "Sexo"
+  )
+```
