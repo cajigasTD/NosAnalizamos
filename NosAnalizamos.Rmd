@@ -168,3 +168,35 @@ ggplot(notas_sexo, aes(x = asignatura, y = nota, fill = Sex)) +
     fill = "Sexo"
   )
 ```
+```{r }
+#10)
+alumnos_completos <- datos %>%
+  select(Id, ALG, ANM, FP, DCS, MD) %>%
+  drop_na()
+
+alumnos_completos_largo <- alumnos_completos %>%
+  pivot_longer(
+    cols = c(ALG, ANM, FP, DCS, MD),
+    names_to = "asignatura",
+    values_to = "nota"
+  )
+
+ggplot(
+  alumnos_completos_largo,
+  aes(
+    x = Id,
+    y = nota,
+    color = asignatura,
+    group = asignatura
+  )
+) +
+  geom_line() +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(
+    title = "Calificaciones de alumnos con todas las asignaturas",
+    x = "Usuario",
+    y = "Calificación",
+    color = "Asignatura"
+  )
+```
