@@ -105,4 +105,25 @@ tabla_estadisticos <- tabla_estadisticos %>%
 
 kable(tabla_estadisticos)
 ```
+```{r }
+#7)
+notas_completas <- notas %>%
+  drop_na()
 
+ggpairs(notas_completas)
+```
+```{r }
+#8)
+corr_pearson <- cor(notas_completas, method = "pearson")
+round(corr_pearson, 2)
+#La correlación más alta, sin tener en cuenta la diagonal 1, es ALG y MD= 0.80
+
+corr_spearman <- cor(notas_completas, method = "spearman")
+round(corr_spearman, 2)
+#La correlación mas alta, sin tener en cuenta la diagonal, es AlG y MD=0.86
+cov_pearson <- cov(notas_completas, method = "pearson")
+round(cov_pearson, 2)
+
+cov_spearman <- cov(notas_completas, method = "spearman")
+round(cov_spearman, 2)
+```
