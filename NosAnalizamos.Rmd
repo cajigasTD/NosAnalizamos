@@ -46,5 +46,26 @@ names(datos)
 datos <- datos %>%
   filter(Id != "martsobm")
 ```
+
+```{r }
+#5)
+asignaturas <- c("ALG", "ANM", "FP", "DCS", "MD")
+
+limpiar_nota <- function(x) {
+  x <- as.character(x)
+  
+  ifelse(
+    is.na(x) | x == "",
+    NA,
+    ifelse(
+      x == "NC",
+      3,
+      as.numeric(x)
+    )
+  )
+}
+
+datos <- datos %>%
+  mutate(across(all_of(asignaturas), limpiar_nota))
 ```
 
