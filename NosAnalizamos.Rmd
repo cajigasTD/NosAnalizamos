@@ -1,6 +1,6 @@
 ---
 title: "NosAnalizamos"
-author; "Mariana Cajigas"
+author: "Mariana Cajigas"
 output: html_document
 date: "2026-05-04"
 ---
@@ -142,11 +142,9 @@ ggplot(notas_largas_sin_na, aes(x = asignatura, y = nota)) +
 ```
 ```{r }
 #10)
-datos$Sex[datos$Sex == "F"] <- "Femenino"
-datos$Sex[datos$Sex == "M"] <- "Masculino"
-
-table(datos$Sex)
-sum(is.na(datos$Sex))
+datos <- datos %>%
+  mutate(Sex = ifelse(Sex == "F", "Femenino",
+              ifelse(Sex == "M", "Masculino", NA)))
 
 notas_largas_sexo <- datos %>%
   select(Id, Sex, ALG, ANM, FP, DCS, MD) %>%
@@ -169,7 +167,7 @@ ggplot(notas_sexo, aes(x = asignatura, y = nota, fill = Sex)) +
   )
 ```
 ```{r }
-#10)
+#11)
 alumnos_completos <- datos %>%
   select(Id, ALG, ANM, FP, DCS, MD) %>%
   drop_na()
@@ -201,7 +199,7 @@ ggplot(
   )
 ```
 ```{r }
-#11)
+#12)
 datos_2026 <- read_tsv(
   "data/NosAutoanalizamos2026 - NosAutoanalizamos (1).tsv",
   skip = 28,
@@ -209,7 +207,7 @@ datos_2026 <- read_tsv(
   show_col_types = FALSE
 )
 
-datos_2026 <- datos_2026[-1, -1]
+datos_2026 <- datos_2026[-1,]
 datos_2026 <- datos_2026[rowSums(!is.na(datos_2026)) > 0, ]
 datos_2026 <- datos_2026 %>%
   filter(!is.na(Id), Id != "")
@@ -237,4 +235,147 @@ ggplot(notas_comparadas, aes(x = asignatura, y = nota, fill = curso)) +
     y = "Calificación",
     fill = "Curso"
   )
+```
+```{r }
+#13.1
+names(datos_2026)
+datos_2026 <- datos_2026 %>%
+  mutate(
+    FechaNac_dt = dmy(`FechaNac(DD-MM-YYYY)`),
+    edad_exacta = as.numeric(dmy("01-02-2026") - FechaNac_dt) / 365
+  )
+
+datos_2026 %>%
+  filter(edad_exacta == min(edad_exacta, na.rm = TRUE)) %>%
+  select(Id, `FechaNac(DD-MM-YYY)`, edad_exacta)
+#El alumno más joven es gipicar con 18,13 años, nacio el 19-12-2007
+```
+
+```{r }
+#13.2
+datos_2026 %>%
+  filter(Hwork > 0) %>%
+  nrow()
+#14 alumos simultaneamente trabajan y estudian
+```
+```{r }
+#13.3
+datos_2026 <- datos_2026 %>%
+  mutate(
+    Smoke = ifelse(Smoke == "Sí", "Si",
+            ifelse(Smoke == "Si", "Si",
+            ifelse(Smoke == "No", "No", NA)))
+  )
+
+table(datos_2026$Smoke)
+datos_2026 %>%
+  filter(Smoke == "Si") %>%
+  count(Sex)
+
+#Hay mas hombres fumadores, son 7
+```
+
+```{r }
+#13.4
+datos_2026 <- datos_2026 %>%
+  mutate(Wr.Hnd = as.numeric(Wr.Hnd))
+
+datos_2026 %>%
+  group_by(Sex) %>%
+  summarise(
+    media = mean(Wr.Hnd, na.rm = TRUE),
+    varianza = var(Wr.Hnd, na.rm = TRUE)
+  )
+#El valor medio para las mujeres en Wr.Hnd es 18.26 mientras que la varianza es 4.2. Por otro ladioo el valor medio para hombres es 19.96 con una varianza de 1.78
+```
+```{r }
+#13.5
+datos_2026 <- datos_2026 %>%
+  mutate(NW.Hnd = ifelse(NW.Hnd == "derecha", "Derecha", NW.Hnd))
+
+
+tabla_sexo_mano <- table(datos_2026$Sex, datos_2026$NW.Hnd)
+tabla_sexo_mano 
+
+chisq.test(tabla_sexo_mano, correct = FALSE)
+
+#No existe relacion para los 2 sexos, la mano predominate es la derecha, ademas el p value es 0.24.
+```
+```{r }
+#13.6
+datos_height_wr <- datos_2026 %>%
+  select(Height, Wr.Hnd) %>%
+  drop_na()
+
+cor(datos_height_wr$Height, datos_height_wr$Wr.Hnd)
+
+ggplot(datos_2026, aes(x = Height, y = Wr.Hnd)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Relación entre Height y Wr.Hnd")
+
+cor.test(
+  datos_height_wr$Height,
+  datos_height_wr$Wr.Hnd,
+  method = "pearson"
+)
+#La correlacion es 0.34, osea que es positiva y moderada, teniendo relaicon lineal peor no muy fuerte
+```
+```{r }
+#13.7
+med_altura <- median(datos_2026$Height, na.rm = TRUE)
+mad_altura <- mad(datos_2026$Height, na.rm = TRUE)
+
+limite_inferior <- med_altura - 3 * mad_altura
+limite_inferior
+
+limite_superior <- med_altura + 3 * mad_altura
+limite_superior
+
+outliers_height <- datos_2026 %>%
+  filter(Height < limite_inferior | Height > limite_superior) %>%
+  select(Id, Height)
+outliers_height
+#No se encuentran outliers con el identificador Hampel en la variable Height.
+```
+```{r }
+#13.8
+mean(datos_2026$FP, na.rm = TRUE)
+
+#Se deberia de utlizar la media de fundamentos de programacion que es 4.09
+```
+```{r }
+#13.9
+datos_2026 <- datos_2026 %>%
+  mutate(Pulse = as.numeric(Pulse))
+
+datos_2026 <- datos_2026 %>%
+  mutate(PulseCat = ifelse(Pulse >= 65, "PulseH", "PulseL"))
+
+datos_2026 %>%
+  group_by(PulseCat) %>%
+  summarise(media_FP = mean(FP, na.rm = TRUE))
+
+#La media de Fp dentro de cada grupo de Pulse Cat. Por lo que la media de Pulse H es 4.6 y de Pulse L es 3.97. Por lo que los de Na no pueden ser imputados por casoso similares, porque no sabemos a que grupo pertenecen.
+```
+```{r }
+#13.10
+datos_pulse_alg <- datos_2026 %>%
+  select(Pulse, ALG) %>%
+  drop_na()
+
+ggplot(datos_pulse_alg, aes(x = Pulse, y = ALG)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Relación entre Pulse y ALG",
+       x = "Pulse",
+       y = "ALG"
+       )
+
+cor.test(
+  datos_pulse_alg$Pulse,
+  datos_pulse_alg$ALG,
+  method = "pearson"
+)
+#Al ser cientifico de datos no podemos aceptar una frase inmediatamente, para ello debemos tratar los datos y analizarlos. En este caso la correlacion entre Pulse y ALg es casi nula al ser 0.196, por lo que no hay una clara relación lineal directa fuerte.
 ```
