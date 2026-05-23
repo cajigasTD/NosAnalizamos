@@ -200,3 +200,41 @@ ggplot(
     color = "Asignatura"
   )
 ```
+```{r }
+#11)
+datos_2026 <- read_tsv(
+  "data/NosAutoanalizamos2026 - NosAutoanalizamos (1).tsv",
+  skip = 28,
+  trim_ws = TRUE,
+  show_col_types = FALSE
+)
+
+datos_2026 <- datos_2026[-1, -1]
+datos_2026 <- datos_2026[rowSums(!is.na(datos_2026)) > 0, ]
+datos_2026 <- datos_2026 %>%
+  filter(!is.na(Id), Id != "")
+
+datos$curso <- "2022"
+datos_2026$curso <- "2026"
+
+datos_2026 <- datos_2026 %>%
+  mutate(across(c(ALG, ANM, FP, DCS, MD), limpiar_nota))
+
+notas_comparadas <- bind_rows(
+  datos %>% select(ALG, ANM, FP, DCS, MD, curso),
+  datos_2026 %>% select(ALG, ANM, FP, DCS, MD, curso)
+) %>%
+  pivot_longer(
+    cols = c(ALG, ANM, FP, DCS, MD),
+    names_to = "asignatura",
+    values_to = "nota"
+  )
+ggplot(notas_comparadas, aes(x = asignatura, y = nota, fill = curso)) +
+  geom_boxplot() +
+  labs(
+    title = "Comparación de resultados 2022 y 2026",
+    x = "Asignatura",
+    y = "Calificación",
+    fill = "Curso"
+  )
+```
