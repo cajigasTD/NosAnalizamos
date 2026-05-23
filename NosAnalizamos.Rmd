@@ -1,8 +1,10 @@
 ---
 title: "NosAnalizamos"
 author: "Mariana Cajigas"
-output: html_document
 date: "2026-05-04"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r }
@@ -11,12 +13,9 @@ library(pacman)
 
 pacman::p_load(
   tidyverse,
-  mice,
   knitr,
-  validate,
-  deducorrect,
-  VIM,
-  GGally
+  GGally,
+  lubridate
 )
 
 ```
@@ -69,6 +68,13 @@ datos <- datos %>%
   mutate(across(all_of(asignaturas), limpiar_nota))
 ```
 ```{r }
+notas <- datos %>%
+  select(ALG, ANM, FP, DCS, MD)
+
+save(notas, file = "Notas.Rdata")
+```
+
+```{r }
 #6)
 notas <- datos %>%
   select(ALG, ANM, FP, DCS, MD)
@@ -120,7 +126,7 @@ round(corr_pearson, 2)
 
 corr_spearman <- cor(notas_completas, method = "spearman")
 round(corr_spearman, 2)
-#La correlación mas alta, sin tener en cuenta la diagonal, es AlG y MD=0.86
+#La correlación mas alta, sin tener en cuenta la diagonal, es ALG y MD=0.86
 cov_pearson <- cov(notas_completas, method = "pearson")
 round(cov_pearson, 2)
 
@@ -241,7 +247,7 @@ ggplot(notas_comparadas, aes(x = asignatura, y = nota, fill = curso)) +
 names(datos_2026)
 datos_2026 <- datos_2026 %>%
   mutate(
-    FechaNac_dt = dmy(`FechaNac(DD-MM-YYYY)`),
+    FechaNac_dt = dmy(`FechaNac(DD-MM-YYY)`),
     edad_exacta = as.numeric(dmy("01-02-2026") - FechaNac_dt) / 365
   )
 
